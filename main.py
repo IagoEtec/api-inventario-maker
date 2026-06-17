@@ -7,14 +7,16 @@ app = FastAPI(title="API Inova Lab - Inventário Maker")
 # 2. O Modelo Pydantic (A "Catraca" de Validação)
 class ComponenteSchema(BaseModel):
     nome: str = Field(..., min_length=2, description="Nome do componente maker")
-    quantidade: int = Field(..., ge=0, description="Quantidade em estoque (deve ser maior ou igual a zero)")
-    categoria: str = Field(..., description="Categoria do item (ex: Atuadores, Microcontroladores)")
+    quantidade: int = Field(..., ge=0, description="Quantidade em estoque")
+    categoria: str = Field(..., description="Categoria do item")
+    estado_conservacao: str = Field(..., description="Estado de conservação do componente")
 
 # 3. Nosso "Banco de Dados" temporário em memória
 estoque_laboratorio = [
-    {"id": 1, "nome": "Arduino Sensor Shield", "quantidade": 15, "categoria": "Placas de Expansão"},
-    {"id": 2, "nome": "Micro Servo Motor SG90", "quantidade": 42, "categoria": "Atuadores"},
-    {"id": 3, "nome": "Esteira em Acrílico", "quantidade": 2, "categoria": "Mecânica"}
+    {"id": 1, "nome": "Arduino Sensor Shield", "quantidade": 15, "categoria": "Placas de Expansão", "estado_conservacao": "Novo"},
+    {"id": 2, "nome": "Micro Servo Motor SG90", "quantidade": 42, "categoria": "Atuadores", "estado_conservacao": "Bom"
+    },
+    {"id": 3, "nome": "Esteira em Acrílico", "quantidade": 2, "categoria": "Mecânica", "estado_conservacao": "Usado"}
 ]
 
 # Rota Raiz
@@ -49,10 +51,14 @@ def adicionar_componente(novo_componente: ComponenteSchema):
 def atualizar_componente(componente_id: int, dados_atualizados: ComponenteSchema):
     for item in estoque_laboratorio:
         if item["id"] == componente_id:
-            item["nome"] = dados_atualizados.nome
-            item["quantidade"] = dados_atualizados.quantidade
-            item["categoria"] = dados_atualizados.categoria
-            return {"mensagem": "Componente atualizado com sucesso!", "componente": item}
+           item["nome"] = dados_atualizados.nome
+           item["quantidade"] = dados_atualizados.quantidade
+           item["categoria"] = dados_atualizados.categoria
+           item["estado_conservacao"] = dados_atualizados.estado_conservacao
+        return {
+            "mensagem": "Componente atualizado com sucesso!",
+            "componente": item
+        }
             
     raise HTTPException(status_code=404, detail="Componente não encontrado no laboratório.")
 
